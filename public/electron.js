@@ -3,28 +3,87 @@ const { app, BrowserWindow, protocol, ipcMain } = require("electron");
 const path = require("path");
 const url = require("url");
 const os = require('node:os');
+const { promisify } = require('util');
+const exec = promisify(require('child_process').exec)
+const spawn = promisify(require('child_process').spawn);
+
+
+const command = async (cmd) => {
+  const nameOutput = await exec(cmd)
+  return nameOutput.stdout.toString()
+};
+
+const createChild = async (cmd) => {
+  const nameOutput = await spawn(cmd)
+  return nameOutput
+}
 
 
 
 // Create the native browser window.
 function createWindow() {
 
+
+
   // Main process
-ipcMain.on('get-system-info', event => {
-    console.log("get-system-info-event called")
-    event.reply("system-info", {
-      percentCPUUsage: process.getCPUUsage(),
-      platform: process.platform,
-      version: process.version,
-      cpuUsage: process.getCPUUsage(),
-      memoryUsage: process.getSystemMemoryInfo(),
-      systemVersion: process.getSystemVersion(),
-      
-    })
-  }) 
+ipcMain.on('get-system-static-info', async event => {
+ 
+  event.reply("system-info", {
+    platform: process.platform,
+    version: process.version,
+    // minCpuSpeed: command("lscpu | grep MHz | grep min").toString(),
+    // maxCpuSpeed: command("lscpu | grep MHz | grep max").toString(),
+  })
+
+  event.reply("min-cpu-speed", await command("lscpu | grep MHz | grep min")) 
+
+  event.reply("max-cpu-Speed", await command("lscpu | grep MHz | grep max"))
+
+  event.reply("cpu-threads-count", await command("grep -c ^processor /proc/cpuinfo"))
+  
+  event.reply("cpu-core-count", await command("grep '^core id' /proc/cpuinfo |sort -u|wc -l"))
+})
+
+ipcMain.on('get-system-dynamic-info', async event => {
+
+  event.reply("cpu-speed", await command("lscpu -p=MHZ")) 
+    
+  event.reply("cpu-voltage", await command("sensors | grep in0: | awk '{print $2}'"))
+
+  event.reply("cpu-amperage", await command("sensors | grep curr1 | awk '{print $2}'"))
+
+  event.reply("cpu-temp", await command("sensors | grep Tctl | awk '{print $2}'"))
+    
+})
+
+ipcMain.on('run-stress-test', async event => {
+  await command("stress-ng --cpu 16")
+})
+
+ipcMain.on('stop-stress-test', async event => {
+  await command("killall stress-ng")
+})
+
+
+// Stresstest CPU :
+// sudo apt install stress-ng
+// stress-ng --cpu 16
+
+// Linux CPU threads count :
+// grep -c ^processor /proc/cpuinfo
+
+// Linux CPU core count :
+// grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}'
+
 
 //Linux current cpu speed : 
 // lscpu -p=MHZ
+
+//Linux min cpu speed :
+//lscpu | grep MHz | grep min
+
+//Linux max cpu speed :
+//lscpu | grep MHz | grep max
 
 // Les commandes ci dessous sont propres a ce pc, il faut les adapter a votre pc
 // Linux CPU core voltage : 

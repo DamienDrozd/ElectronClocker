@@ -17,5 +17,5 @@
 ### OverClocking / UnderClocking
 - Augmentation / Diminution de la vitesse maximale
 - Augmentation / Diminution du voltage processeur
-- Augmentation / Diminution de l'ampérage'
+- Augmentation / Diminution de l'ampérage
 

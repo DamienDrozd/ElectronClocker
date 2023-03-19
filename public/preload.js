@@ -7,20 +7,65 @@ const { contextBridge, ipcRenderer } = require("electron");
 // and node versions to the main window.
 // They'll be accessible at "window.versions".
 process.once("loaded", () => {
-  contextBridge.exposeInMainWorld("versions", process.versions);
-  contextBridge.exposeInMainWorld('electronAPI', {
-    requestSystemInfo: () => ipcRenderer.send('get-system-info'),
-    getSystemInfo: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le 
+  contextBridge.exposeInMainWorld('staticAPI', {
+  requestSystemInfo: () => ipcRenderer.send('get-system-static-info'),
+  getSystemInfo: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le 
       ipcRenderer.on('system-info', (event, info) => {
-        console.log('info', info)
         setState(info) // on set la state avec les infos et on peux ainsi récupérer correctement les infos.
       }),
-    alertNotification: () => 
-      new Notification('Notification', {
-        body: 'Lorem Ipsum Dolor Sit Amet'
+  getMinCpuSpeed: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+      ipcRenderer.on('min-cpu-speed', (event, info) => {
+        setState(info) 
       }),
+  getMaxCpuSpeed: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+    ipcRenderer.on('max-cpu-Speed', (event, info) => {
+      setState(info) 
+    }),
+  getCpuThreadsCount: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+    ipcRenderer.on('cpu-threads-count', (event, info) => {
+      setState(info) 
+    }),
+  getCpuCoreCount: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+    ipcRenderer.on('cpu-core-count', (event, info) => { 
+      setState(info) 
+    }),
+  })
+  contextBridge.exposeInMainWorld('dynamicAPI', {
+    requestSystemInfo: () => ipcRenderer.send('get-system-dynamic-info'),
+    getCpuSpeed: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+      ipcRenderer.on('cpu-speed', (event, info) => {
+        setState(info) 
+      }),
+    getCpuVoltage: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+      ipcRenderer.on('cpu-voltage', (event, info) => {
+        setState(info) 
+      }),
+    getCpuAmperage: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+      ipcRenderer.on('cpu-amperage', (event, info) => {
+        setState(info) 
+      }),
+    getCpuTemp: (setState) => // on ajoute ici un parametre qui sera une fonction setState envoyée par le
+      ipcRenderer.on('cpu-temp', (event, info) => {
+        setState(info) 
+      }),
+    
+  })
+
+  contextBridge.exposeInMainWorld('StressTest', {
+    requestStressTest: (setState) =>{
+      ipcRenderer.send('run-stress-test');
+      console.log('Stress test started')
+      setState(true);
+    },
+    stopStressTest: (setState) => {
+      ipcRenderer.send('stop-stress-test');
+      console.log('Stress test stopped')
+      setState(false);
+    },
   })
 });
+
+
 
 // Renderer process
 
