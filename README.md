@@ -1,6 +1,9 @@
 # ElectronClocker
 ## Overclocker app developped in ElectronJS
 
+### Lien de la vidéo de présentation : 
+https://www.youtube.com/watch?v=wrlH1r1Wl34
+
 ### Affichage de la configuration du CPU : 
 - Vitesse minimale d'un coeur,
 - Vitesse Maximale d'un coeur,
@@ -18,4 +21,5 @@
 - Augmentation / Diminution de la vitesse maximale
 - Augmentation / Diminution du voltage processeur
 - Augmentation / Diminution de l'ampérage
+- Activation / désactivation du turbo boost
 
