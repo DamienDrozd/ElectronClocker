@@ -6,12 +6,12 @@ export const StressTestDiv = styled.div`
     border-radius: 10px;
     border: 1px solid ${props => props.theme.border};
     padding: 20px;
-    margin: 20px;
+    margin: 5px;
     display: block;
     font-size: 20px;
     color: ${props => props.theme.text};
-    font-family: 'Roboto', sans-serif;
     height: 100%;
+    Text-align: center;
 `
 export const CardDiv =  styled.div`
     display: flex;
@@ -21,7 +21,29 @@ export const CardDiv =  styled.div`
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
     padding: 20px;
     margin: 20px;
-    font-family: 'Roboto', sans-serif;
     border: 1px solid ${props => props.theme.border};
+`
 
+export const StartStressTestButton = styled.button`
+    background-color: ${props => props.theme.primary};
+    border-radius: 10px;
+    border: 1px solid ${props => props.theme.border};
+    padding: 20px;
+    margin: 5px;
+    display: block;
+    font-size: 20px;
+    color: ${props => props.theme.white};
+    height: 100%;
+    width: 100%;
+`
+
+export const StopStressTestButton = styled.button`
+    background-color: ${props => props.theme.secondary};
+    border-radius: 10px;
+    border: 1px solid ${props => props.theme.border};
+    display: block;
+    font-size: 20px;
+    color: ${props => props.theme.white};
+    height: 100%;
+    width: 100%;
 `

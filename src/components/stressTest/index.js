@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { CardDiv, StressTestDiv } from "./styles";
+import { CardDiv, StressTestDiv, StartStressTestButton, StopStressTestButton } from "./styles";
+
+import { TopBar } from "../AppleTopBar";
 
 
 export const StressTest = () => {
@@ -7,27 +9,29 @@ export const StressTest = () => {
 
     const runStressTest = async () => {
         if (stressTest === false) {
-        await window.StressTest.requestStressTest(setStressTest)
+            await window.StressTest.requestStressTest(setStressTest)
         } else {
-        await window.StressTest.stopStressTest(setStressTest)
+            await window.StressTest.stopStressTest(setStressTest)
         }
     }
 
+    
+
     return (
         <CardDiv>
+            <TopBar />
             <StressTestDiv>
                 <p>
-                stressTest = {stressTest}
+                    stressTest
                 </p>
-                <button onClick={runStressTest}>Stress test</button>
-                {() => {if (stressTest === true) {
-                return <p>Stress test is running</p>
-                } else {
-                    return <p>Stress test is not running</p>
+                {stressTest === false ? 
+                    <StartStressTestButton onClick={runStressTest}>Start stress test</StartStressTestButton>
+                    :
+                    <StopStressTestButton onClick={runStressTest}>Stop stress test</StopStressTestButton>
                 }
-                }}
             </StressTestDiv>
         </CardDiv>
     );
 };
+
 

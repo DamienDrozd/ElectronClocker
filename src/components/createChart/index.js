@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Chart } from "../chart";
+import { CustomSelect } from "./styles";
 
 
 export const CreateChart = ({cpuAmperage, cpuSpeeds, cpuTemperature, cpuVoltage,currentThread, time}) => {
@@ -23,15 +24,7 @@ export const CreateChart = ({cpuAmperage, cpuSpeeds, cpuTemperature, cpuVoltage,
     }
 
     const updateChart = (cpuSpeeds, cpuVoltage, cpuAmperage, cpuTemperature) => {
-        // console.log("chartValues: ", chartValues)
 
-        // console.log("currentThread: ", currentThread)
-        // console.log("chartType: ", chartType)
-        // console.log("cpuSpeeds: ", cpuSpeeds)
-        // console.log("cpuVoltage: ", cpuVoltage)
-        // console.log("cpuAmperage: ", cpuAmperage)
-        // console.log("cpuTemperature: ", cpuTemperature)
-        // console.log("chartCpuSpeed: ", chartCpuSpeed)
 
 
         if (chartCpuSpeed.length === 0 && cpuSpeeds !== undefined && cpuSpeeds.length !== 0){
@@ -87,13 +80,13 @@ export const CreateChart = ({cpuAmperage, cpuSpeeds, cpuTemperature, cpuVoltage,
     return (
         <div className="App"> 
             <Chart chartValues={chartValues} />
-            <select name="cpu" id="cpu" onChange={e => setChartType(e.target.value)}>
+            <CustomSelect name="cpu" id="cpu" onChange={e => setChartType(e.target.value)}>
             <option value="cpuSpeed">cpuSpeed</option>
             <option value="cpuVoltage">cpuVoltage</option>
             <option value="cpuAmperage">cpuAmperage</option>
             <option value="cpuTemperature">cpuTemperature</option>  
             <option value="cpuCore">cpuCore</option>
-            </select>
+            </CustomSelect>
         </div>
     );
 };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { CardDiv, DynamicInformation, ChartDiv, ChartCardDiv } from "./styles";
+import { CardDiv, DynamicInformation, ChartDiv, ChartCardDiv, CustomSelect } from "./styles";
 
 import { CreateChart } from "../createChart";
+
+import { TopBar } from "../AppleTopBar";
 
 
 
@@ -10,7 +12,7 @@ export const DynamicInfo = () => {
     const [time, setTime] = React.useState(0); 
 
     const [cpuThreadsCount, setCpuThreadsCount] = useState(0)
-    
+     
 
     const [cpuSpeed, setCpuSpeed] = useState("")
     const [cpuVoltage, setCpuVoltage] = useState("")
@@ -72,10 +74,11 @@ export const DynamicInfo = () => {
     return (
         <>
             <CardDiv> 
+                <TopBar />
                 <DynamicInformation>
-                    <select name="cpu" id="cpu" onChange={e => setCurrentThread(e.target.value)}>
+                    <CustomSelect name="cpu" id="cpu" onChange={e => setCurrentThread(e.target.value)}>
                     {renderSelect()}
-                    </select>
+                    </CustomSelect>
                     <p>
                     CurrentCpuSpeed = {cpuSpeeds[currentThread]} MHz
                     </p>
@@ -92,6 +95,7 @@ export const DynamicInfo = () => {
                 </DynamicInformation>
             </CardDiv>
             <ChartCardDiv>
+                <TopBar />
                 <ChartDiv>
                     <CreateChart cpuAmperage={cpuAmperage} cpuSpeeds={cpuSpeeds} cpuTemperature={cpuTemperature} cpuVoltage={cpuVoltage} currentThread={currentThread} time={time} />
                 </ChartDiv>

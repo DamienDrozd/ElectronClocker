@@ -3,14 +3,14 @@ import { classic } from "./data";
 import React, { useState, useEffect } from "react";
 
 
-export const Chart = ({chartValues}) => {
+export const Chart = ({chartValues, theme}) => {
     // classic.series[0].data = data  
     const [data, setData] = useState(classic)
     useEffect(() => {
         const newSeries = {
             data: chartValues,
             type: "line",
-            itemStyle: { color: "green" }
+            itemStyle: { color: "#ff0000" }
         }
         let newData = {...data}
         newData.series = newSeries

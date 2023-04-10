@@ -2,10 +2,15 @@
 const { app, BrowserWindow, protocol, ipcMain } = require("electron");
 const path = require("path");
 const url = require("url");
+const sudo = require('sudo-js');
+
 const os = require('node:os');
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec)
-const spawn = promisify(require('child_process').spawn);
+const fs = require('fs');
+
+sudo.setPassword("test");
+let passwordValid = false;
 
 
 const command = async (cmd) => {
@@ -13,9 +18,45 @@ const command = async (cmd) => {
   return nameOutput.stdout.toString()
 };
 
-const createChild = async (cmd) => {
-  const nameOutput = await spawn(cmd)
-  return nameOutput
+async function sudo_command(cmd){
+  console.log("sudo command : " + cmd)
+  return new Promise((resolve) => {
+    sudo.exec(cmd, (err, pid, result) => {
+      console.log("result : " + result);
+      console.log("err : " + err);
+      console.log("pid : " + pid);
+      resolve(result); // resolve the Promise with the value
+    });
+  });
+};
+
+async function fileWrite(file, data) {
+  try {
+    console.log("fileWrite : " + file)
+    console.log("data : " + data)
+      return new Promise((resolve) => {
+        fs.writeFile(file, data, (err) => {
+          if (err) {
+            console.log("error : " + err)
+            resolve(false);
+          } else {
+            console.log("fileWrite : " + file + " success")
+            resolve(true);
+          }
+        });
+      });
+  } catch (err) {
+    console.log("error : " + err)
+  }
+}
+
+async function checkPassword() {
+  return new Promise((resolve) => {
+    sudo.check((value) => {
+      console.log("passwd : " + value);
+      resolve(value); // resolve the Promise with the value
+    });
+  });
 }
 
 
@@ -35,9 +76,9 @@ ipcMain.on('get-system-static-info', async event => {
     // maxCpuSpeed: command("lscpu | grep MHz | grep max").toString(),
   })
 
-  event.reply("min-cpu-speed", await command("lscpu | grep MHz | grep min")) 
+  event.reply("min-cpu-speed", await command("lscpu | grep MHz | grep min | tr -cd '[[:digit:]]'")) 
 
-  event.reply("max-cpu-Speed", await command("lscpu | grep MHz | grep max"))
+  event.reply("max-cpu-Speed", await command("lscpu | grep MHz | grep max | tr -cd '[[:digit:]]'"))
 
   event.reply("cpu-threads-count", await command("grep -c ^processor /proc/cpuinfo"))
   
@@ -64,36 +105,55 @@ ipcMain.on('stop-stress-test', async event => {
   await command("killall stress-ng")
 })
 
+ipcMain.on("check-password", async event => {
+  event.reply("password-test", await checkPassword())
+})
 
-// Stresstest CPU :
-// sudo apt install stress-ng
-// stress-ng --cpu 16
+ipcMain.on("set-password", async (event, arg) =>
+{
+  process.env.PASSWORD = arg
+  sudo.setPassword(process.env.PASSWORD);
+})
 
-// Linux CPU threads count :
-// grep -c ^processor /proc/cpuinfo
+ipcMain.on("install-package", async (event) => {
+  console.log("install-package")
+  event.reply("install-script", await sudo_command("public/packages-install.sh"))
+})
 
-// Linux CPU core count :
-// grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}'
+
+ipcMain.on('over-clocking-info', async event => {
+  event.reply("min-current-cpu-speed", await command("cpupower frequency-info | grep 'current policy' | grep -Eo '[+-]?([0-9]*[.])?[0-9]+' | sed -n '1p'"))
+  event.reply("max-current-cpu-speed", await command("cpupower frequency-info | grep 'current policy' | grep -Eo '[+-]?([0-9]*[.])?[0-9]+' | sed -n '2p'"))
+  event.reply("get-turbo-boost", await command("cat /sys/devices/system/cpu/cpufreq/boost"))
+})
+
+ipcMain.on('start-cpu-boost', async event => {
+  // await fileWrite("./data/boost", '1')
+  await command("echo '1' | sudo -S tee /sys/devices/system/cpu/cpufreq/boost")
+  event.reply("start-turbo-boost-output", await command("cat /sys/devices/system/cpu/cpufreq/boost"))
+})
+
+ipcMain.on('stop-cpu-boost', async event => {
+  // await fileWrite("./data/boost", '0')
+  await command("echo '0' | sudo -S tee /sys/devices/system/cpu/cpufreq/boost")
+  event.reply("stop-turbo-boost-output", await command("cat /sys/devices/system/cpu/cpufreq/boost"))
+}) 
+ipcMain.on('test-cpu-boost', async event => {
+  event.reply("test-turbo-boost-output", await command("cat /sys/devices/system/cpu/cpufreq/boost"))
+}) 
+
+ipcMain.on('set-max-cpu-speed', async (event, arg)  => {
+  console.log("set-max-cpu-speed : " + arg *1000)
+  await command("echo " + arg * 1000 + " | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq")
+})
+
+ipcMain.on('set-min-cpu-speed', async (event, arg)  => {
+  console.log("set-min-cpu-speed")
+  await command("sudo -S cpupower frequency-set -d " + arg + "MHz")
+})
 
 
-//Linux current cpu speed : 
-// lscpu -p=MHZ
 
-//Linux min cpu speed :
-//lscpu | grep MHz | grep min
-
-//Linux max cpu speed :
-//lscpu | grep MHz | grep max
-
-// Les commandes ci dessous sont propres a ce pc, il faut les adapter a votre pc
-// Linux CPU core voltage : 
-//sensors | grep in0: | awk '{print $2}'
-
-// Linux CPU core temperature :
-// sensors | grep Tctl | awk '{print $2}'
-
-// Linux CPU core amperage :
-// sensors | grep curr1 | awk '{print $2}'
 
 
 
